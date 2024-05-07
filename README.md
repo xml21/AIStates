@@ -1,2 +1,2 @@
-# TriternionLyraAssignment
- Rudimentary building system to the Lyra project
+# LyraStarterGame
+ Rudimentary Building System
