@@ -52,6 +52,12 @@ public:
 	void AddAbilityToActivationGroup(ELyraAbilityActivationGroup Group, ULyraGameplayAbility* LyraAbility);
 	void RemoveAbilityFromActivationGroup(ELyraAbilityActivationGroup Group, ULyraGameplayAbility* LyraAbility);
 	void CancelActivationGroupAbilities(ELyraAbilityActivationGroup Group, ULyraGameplayAbility* IgnoreLyraAbility, bool bReplicateCancelAbility);
+	bool CanActivateAbilityByClass(TSubclassOf<UGameplayAbility> InAbility, const FGameplayTagContainer& SourceTags, FGameplayTagContainer& FailureTags) const;
+	
+	float GetAbilityWeight(TSubclassOf<ULyraGameplayAbility> InAbility) const;
+	bool GetRecentTagTimePassed(const FGameplayTag& RecentSearchedTag, float& OutTimePassed) const;
+	FGameplayAbilitySpec* GetActivatableGameplayAbilitySpecByTag(FGameplayTag AbilityTag, bool bOnlyAbilitiesThatSatisfyTagRequirements = true) const;
+	bool WillAbilityAffectTarget(TSubclassOf<ULyraGameplayAbility> InAbility, const FGameplayEventData& Payload, float Leeway, float& Strength);
 
 	// Uses a gameplay effect to add the specified dynamic granted tag.
 	void AddDynamicTagGameplayEffect(const FGameplayTag& Tag);
@@ -91,6 +97,10 @@ protected:
 	// If set, this table is used to look up tag relationships for activate and cancel
 	UPROPERTY()
 	TObjectPtr<ULyraAbilityTagRelationshipMapping> TagRelationshipMapping;
+
+	// Ability weight map used for AI states logic
+	UPROPERTY()
+	TMap<FGameplayAbilitySpecHandle, float> AbilityWeights;
 
 	// Handles to abilities that had their input pressed this frame.
 	TArray<FGameplayAbilitySpecHandle> InputPressedSpecHandles;

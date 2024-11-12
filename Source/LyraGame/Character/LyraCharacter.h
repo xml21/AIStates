@@ -22,6 +22,7 @@ class ULyraAbilitySystemComponent;
 class ULyraCameraComponent;
 class ULyraHealthComponent;
 class ULyraPawnExtensionComponent;
+class ULyraBuildingManagerComponent;
 class UObject;
 struct FFrame;
 struct FGameplayTag;
@@ -110,6 +111,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Lyra|Character")
 	ULyraAbilitySystemComponent* GetLyraAbilitySystemComponent() const;
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+	virtual ULyraBuildingManagerComponent* GetBuildingComeponent() const { return BuildingComponent; }
 
 	virtual void GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) const override;
 	virtual bool HasMatchingGameplayTag(FGameplayTag TagToCheck) const override;
@@ -197,6 +199,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Lyra|Character", Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<ULyraCameraComponent> CameraComponent;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Lyra|Character", Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<ULyraBuildingManagerComponent> BuildingComponent;
 
 	UPROPERTY(Transient, ReplicatedUsing = OnRep_ReplicatedAcceleration)
 	FLyraReplicatedAcceleration ReplicatedAcceleration;

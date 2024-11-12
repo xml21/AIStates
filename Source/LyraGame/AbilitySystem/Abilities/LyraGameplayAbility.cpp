@@ -518,6 +518,12 @@ bool ULyraGameplayAbility::ChangeActivationGroup(ELyraAbilityActivationGroup New
 	return true;
 }
 
+bool ULyraGameplayAbility::WillAffectTarget_Implementation(FGameplayAbilityActorInfo ActorInfo,
+	const FGameplayAbilitySpecHandle Handle, const FGameplayEventData& Payload, float Leeway, float& Strength) const
+{
+	return true;
+}
+
 void ULyraGameplayAbility::SetCameraMode(TSubclassOf<ULyraCameraMode> CameraMode)
 {
 	ENSURE_ABILITY_IS_INSTANTIATED_OR_RETURN(SetCameraMode, );

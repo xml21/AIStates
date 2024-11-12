@@ -22,6 +22,7 @@
 #include "Camera/LyraCameraMode.h"
 #include "UserSettings/EnhancedInputUserSettings.h"
 #include "InputMappingContext.h"
+#include "BuildingSystem/LyraBuildingManagerComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(LyraHeroComponent)
 
@@ -284,8 +285,12 @@ void ULyraHeroComponent::InitializePlayerInput(UInputComponent* PlayerInputCompo
 					LyraIC->BindAbilityActions(InputConfig, this, &ThisClass::Input_AbilityInputTagPressed, &ThisClass::Input_AbilityInputTagReleased, /*out*/ BindHandles);
 
 					LyraIC->BindNativeAction(InputConfig, LyraGameplayTags::InputTag_Move, ETriggerEvent::Triggered, this, &ThisClass::Input_Move, /*bLogIfNotFound=*/ false);
+					//LyraIC->BindNativeAction(InputConfig, LyraGameplayTags::InputTag_Pressed_LB_Mouse, ETriggerEvent::Triggered, this, &ThisClass::Input_LB_Pressed, /*bLogIfNotFound=*/ false);
 					LyraIC->BindNativeAction(InputConfig, LyraGameplayTags::InputTag_Look_Mouse, ETriggerEvent::Triggered, this, &ThisClass::Input_LookMouse, /*bLogIfNotFound=*/ false);
 					LyraIC->BindNativeAction(InputConfig, LyraGameplayTags::InputTag_Look_Stick, ETriggerEvent::Triggered, this, &ThisClass::Input_LookStick, /*bLogIfNotFound=*/ false);
+					LyraIC->BindNativeAction(InputConfig, LyraGameplayTags::InputTag_ChangeBuilding, ETriggerEvent::Triggered, this, &ThisClass::Input_ChangeBuilding, /*bLogIfNotFound=*/ false);
+					LyraIC->BindNativeAction(InputConfig, LyraGameplayTags::InputTag_Build, ETriggerEvent::Triggered, this, &ThisClass::Input_Build, /*bLogIfNotFound=*/ false);
+					LyraIC->BindNativeAction(InputConfig, LyraGameplayTags::InputTag_PlaceBuilding, ETriggerEvent::Triggered, this, &ThisClass::Input_PlaceBuilding, /*bLogIfNotFound=*/ false);
 					LyraIC->BindNativeAction(InputConfig, LyraGameplayTags::InputTag_Crouch, ETriggerEvent::Triggered, this, &ThisClass::Input_Crouch, /*bLogIfNotFound=*/ false);
 					LyraIC->BindNativeAction(InputConfig, LyraGameplayTags::InputTag_AutoRun, ETriggerEvent::Triggered, this, &ThisClass::Input_AutoRun, /*bLogIfNotFound=*/ false);
 				}
@@ -446,6 +451,73 @@ void ULyraHeroComponent::Input_LookStick(const FInputActionValue& InputActionVal
 	if (Value.Y != 0.0f)
 	{
 		Pawn->AddControllerPitchInput(Value.Y * LyraHero::LookPitchRate * World->GetDeltaSeconds());
+	}
+}
+
+void ULyraHeroComponent::Input_ScrollUpMouse(const FInputActionValue& InputActionValue)
+{
+	if (ALyraCharacter* Character = GetPawn<ALyraCharacter>())
+	{
+		if(ULyraBuildingManagerComponent* BuildingComponent = Character->GetBuildingComeponent())
+		{
+			BuildingComponent->IncrementBuildingType();
+		}
+		else
+		{
+			UE_LOG(LogLyra, Error, TEXT("Building Component could not be retrieved!"));
+		}
+	}
+}
+
+void ULyraHeroComponent::Input_ChangeBuilding(const FInputActionValue& InputActionValue)
+{
+	if (ALyraCharacter* Character = GetPawn<ALyraCharacter>())
+	{
+		if(ULyraBuildingManagerComponent* BuildingComponent = Character->GetBuildingComeponent())
+		{
+			if(InputActionValue.GetMagnitude() == 1)
+			{
+				BuildingComponent->IncrementBuildingType();
+			}
+			else if (InputActionValue.GetMagnitude() == -1)
+			{
+				BuildingComponent->DecrementBuildingType();
+			}
+		}
+		else
+		{
+			UE_LOG(LogLyra, Error, TEXT("Building Component could not be retrieved!"));
+		}
+	}
+}
+
+void ULyraHeroComponent::Input_Build(const FInputActionValue& InputActionValue)
+{
+	if (ALyraCharacter* Character = GetPawn<ALyraCharacter>())
+	{
+		if(ULyraBuildingManagerComponent* BuildingComponent = Character->GetBuildingComeponent())
+		{
+			BuildingComponent->ToggleBuildingMode();
+		}
+		else
+		{
+			UE_LOG(LogLyra, Error, TEXT("Building Component could not be retrieved!"));
+		}
+	}
+}
+
+void ULyraHeroComponent::Input_PlaceBuilding(const FInputActionValue& InputActionValue)
+{
+	if (ALyraCharacter* Character = GetPawn<ALyraCharacter>())
+	{
+		if(ULyraBuildingManagerComponent* BuildingComponent = Character->GetBuildingComeponent())
+		{
+			BuildingComponent->PlaceBuilding();
+		}
+		else
+		{
+			UE_LOG(LogLyra, Error, TEXT("Building Component could not be retrieved!"));
+		}
 	}
 }
 

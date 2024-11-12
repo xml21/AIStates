@@ -3,6 +3,7 @@
 #pragma once
 
 #include "ModularAIController.h"
+#include "AI/AIStateController.h"
 #include "Teams/LyraTeamAgentInterface.h"
 
 #include "LyraPlayerBotController.generated.h"
@@ -21,7 +22,7 @@ struct FFrame;
  *	The controller class used by player bots in this project.
  */
 UCLASS(Blueprintable)
-class ALyraPlayerBotController : public AModularAIController, public ILyraTeamAgentInterface
+class ALyraPlayerBotController : public AAIStateController, public ILyraTeamAgentInterface
 {
 	GENERATED_BODY()
 

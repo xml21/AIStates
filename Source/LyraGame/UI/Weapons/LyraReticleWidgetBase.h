@@ -41,6 +41,8 @@ public:
 	bool HasFirstShotAccuracy() const;
 
 protected:
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+	
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<ULyraWeaponInstance> WeaponInstance;
 

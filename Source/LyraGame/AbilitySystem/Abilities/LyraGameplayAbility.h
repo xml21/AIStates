@@ -129,6 +129,14 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "Lyra|Ability", Meta = (ExpandBoolAsExecs = "ReturnValue"))
 	bool ChangeActivationGroup(ELyraAbilityActivationGroup NewGroup);
 
+	/**
+	* Returns true if this ability can affect target (check here if target is within range etc.).
+	* Optional Strength out parameter indicates affection strength (e.g. how far target is from AoE damage center).
+	* Has no side effects
+	*/
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = Ability)
+	bool WillAffectTarget(FGameplayAbilityActorInfo ActorInfo, const FGameplayAbilitySpecHandle Handle, const FGameplayEventData& Payload, float Leeway, float& Strength) const;
+
 	// Sets the ability's camera mode.
 	UFUNCTION(BlueprintCallable, Category = "Lyra|Ability")
 	void SetCameraMode(TSubclassOf<ULyraCameraMode> CameraMode);

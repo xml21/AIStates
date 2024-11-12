@@ -2,6 +2,7 @@
 
 #include "LyraReticleWidgetBase.h"
 
+#include "BuildingSystem/LyraBuildingManagerComponent.h"
 #include "Inventory/LyraInventoryItemInstance.h"
 #include "Weapons/LyraRangedWeaponInstance.h"
 #include "Weapons/LyraWeaponInstance.h"
@@ -50,6 +51,43 @@ bool ULyraReticleWidgetBase::HasFirstShotAccuracy() const
 	else
 	{
 		return false;
+	}
+}
+
+void ULyraReticleWidgetBase::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+	Super::NativeTick(MyGeometry, InDeltaTime);
+	
+	const APawn* OwningPawn = GetOwningPlayerPawn();
+	if(ensureMsgf(OwningPawn, TEXT("Owning Pawn is invalid!")))
+	{
+		const ULyraBuildingManagerComponent* BuildingManagerComponent = OwningPawn->GetComponentByClass<ULyraBuildingManagerComponent>();
+		if(ensureMsgf(BuildingManagerComponent, TEXT("Building Manager is invalid!")))
+		{
+			const ELyraBuildModeState BuildMode = BuildingManagerComponent->GetBuildMode();
+			switch(BuildMode)
+			{
+				case ELyraBuildModeState::Enabled:
+				{
+					if (BuildingManagerComponent->IsGhostBuildingOverlapping())
+					{
+						SetColorAndOpacity(FColor::Red);
+					}
+					else
+					{
+						SetColorAndOpacity(FColor::Green);
+					}
+
+					break;
+				}
+				case ELyraBuildModeState::Disabled:
+				{
+					SetColorAndOpacity(FColor::White);
+
+					break;	
+				}
+			}
+		}
 	}
 }
 

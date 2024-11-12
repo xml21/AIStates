@@ -6,9 +6,9 @@
 
 #include "LyraBotCreationComponent.generated.h"
 
+class AAIStateController;
 class ULyraExperienceDefinition;
 class ULyraPawnData;
-class AAIController;
 
 UCLASS(Blueprintable, Abstract)
 class ULyraBotCreationComponent : public UGameStateComponent
@@ -30,7 +30,7 @@ protected:
 	int32 NumBotsToCreate = 5;
 
 	UPROPERTY(EditDefaultsOnly, Category=Gameplay)
-	TSubclassOf<AAIController> BotControllerClass;
+	TSubclassOf<AAIStateController> BotControllerClass;
 
 	UPROPERTY(EditDefaultsOnly, Category=Gameplay)
 	TArray<FString> RandomBotNames;
@@ -39,7 +39,7 @@ protected:
 
 protected:
 	UPROPERTY(Transient)
-	TArray<TObjectPtr<AAIController>> SpawnedBotList;
+	TArray<TObjectPtr<AAIStateController>> SpawnedBotList;
 
 #if WITH_SERVER_CODE
 public:

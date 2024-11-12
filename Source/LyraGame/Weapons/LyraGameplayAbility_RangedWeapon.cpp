@@ -4,10 +4,10 @@
 #include "Weapons/LyraRangedWeaponInstance.h"
 #include "Physics/LyraCollisionChannels.h"
 #include "LyraLogChannels.h"
-#include "AIController.h"
 #include "NativeGameplayTags.h"
 #include "Weapons/LyraWeaponStateComponent.h"
 #include "AbilitySystemComponent.h"
+#include "AIController.h"
 #include "AbilitySystem/LyraGameplayAbilityTargetData_SingleTargetHit.h"
 #include "DrawDebugHelpers.h"
 

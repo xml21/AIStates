@@ -6,6 +6,7 @@
 #include "Camera/LyraCameraComponent.h"
 #include "Character/LyraHealthComponent.h"
 #include "Character/LyraPawnExtensionComponent.h"
+#include "BuildingSystem/LyraBuildingManagerComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "LyraCharacterMovementComponent.h"
@@ -71,6 +72,8 @@ ALyraCharacter::ALyraCharacter(const FObjectInitializer& ObjectInitializer)
 
 	CameraComponent = CreateDefaultSubobject<ULyraCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetRelativeLocation(FVector(-300.0f, 0.0f, 75.0f));
+
+	BuildingComponent = CreateDefaultSubobject<ULyraBuildingManagerComponent>(TEXT("BuildingComponent"));
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = true;

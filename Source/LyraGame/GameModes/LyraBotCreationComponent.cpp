@@ -2,12 +2,12 @@
 
 #include "LyraBotCreationComponent.h"
 #include "LyraGameMode.h"
+#include "AI/AIStateController.h"
 #include "Engine/World.h"
 #include "GameFramework/PlayerState.h"
 #include "GameModes/LyraExperienceManagerComponent.h"
 #include "Development/LyraDeveloperSettings.h"
 #include "Character/LyraPawnExtensionComponent.h"
-#include "AIController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Character/LyraHealthComponent.h"
 
@@ -101,7 +101,7 @@ void ULyraBotCreationComponent::SpawnOneBot()
 	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	SpawnInfo.OverrideLevel = GetComponentLevel();
 	SpawnInfo.ObjectFlags |= RF_Transient;
-	AAIController* NewController = GetWorld()->SpawnActor<AAIController>(BotControllerClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnInfo);
+	AAIStateController* NewController = GetWorld()->SpawnActor<AAIStateController>(BotControllerClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnInfo);
 
 	if (NewController != nullptr)
 	{
@@ -136,7 +136,7 @@ void ULyraBotCreationComponent::RemoveOneBot()
 		// that's high skill or low skill or etc... depending on why you are removing one
 		const int32 BotToRemoveIndex = FMath::RandRange(0, SpawnedBotList.Num() - 1);
 
-		AAIController* BotToRemove = SpawnedBotList[BotToRemoveIndex];
+		AAIStateController* BotToRemove = SpawnedBotList[BotToRemoveIndex];
 		SpawnedBotList.RemoveAtSwap(BotToRemoveIndex);
 
 		if (BotToRemove)

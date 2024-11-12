@@ -9,6 +9,7 @@
 #include "GameFramework/Pawn.h"
 #include "LyraGlobalAbilitySystem.h"
 #include "LyraLogChannels.h"
+#include "AI/AIStates/AIStatesSettings.h"
 #include "System/LyraAssetManager.h"
 #include "System/LyraGameData.h"
 
@@ -372,6 +373,44 @@ void ULyraAbilitySystemComponent::HandleChangeAbilityCanBeCanceled(const FGamepl
 	//@TODO: Apply any special logic like blocking input or movement
 }
 
+bool ULyraAbilitySystemComponent::CanActivateAbilityByClass(TSubclassOf<UGameplayAbility> InAbility,
+	const FGameplayTagContainer& SourceTags, FGameplayTagContainer& FailureTags) const
+{
+	const UGameplayAbility* const InAbilityCDO = InAbility.GetDefaultObject();
+
+	for (const FGameplayAbilitySpec& Spec : ActivatableAbilities.Items)
+	{
+		if (Spec.Ability == InAbilityCDO)
+		{
+			const FGameplayAbilityActorInfo* ActorInfo = AbilityActorInfo.Get();
+			const FGameplayTagContainer* SourceTagsPtr = SourceTags.IsEmpty() ? nullptr : &SourceTags;
+
+			const bool bCanActivate = InAbilityCDO->CanActivateAbility(Spec.Handle, ActorInfo, SourceTagsPtr, nullptr, &FailureTags);
+
+			return bCanActivate;
+		}
+	}
+
+	return false;
+}
+
+float ULyraAbilitySystemComponent::GetAbilityWeight(const TSubclassOf<ULyraGameplayAbility> InAbility) const
+{
+	for (const FGameplayAbilitySpec& AbilitySpec : ActivatableAbilities.Items)
+	{
+		if (AbilitySpec.Ability->GetClass() == InAbility)
+		{
+			const float* Weight = AbilityWeights.Find(AbilitySpec.Handle);
+			if (Weight != nullptr)
+			{
+				return *Weight;
+			}
+		}
+	}
+
+	return 0;
+}
+
 void ULyraAbilitySystemComponent::GetAdditionalActivationTagRequirements(const FGameplayTagContainer& AbilityTags, FGameplayTagContainer& OutActivationRequired, FGameplayTagContainer& OutActivationBlocked) const
 {
 	if (TagRelationshipMapping)
@@ -473,6 +512,77 @@ void ULyraAbilitySystemComponent::CancelActivationGroupAbilities(ELyraAbilityAct
 	};
 
 	CancelAbilitiesByFunc(ShouldCancelFunc, bReplicateCancelAbility);
+}
+
+bool ULyraAbilitySystemComponent::GetRecentTagTimePassed(const FGameplayTag& RecentSearchedTag,
+	float& OutTimePassed) const
+{
+	const auto& ActiveGEs = GetActiveGameplayEffects();
+
+	// Remember Recent Tag GE Class
+	TSoftClassPtr<UGameplayEffect> EffectClassPtr = UAIStatesSettings::Get()->RememberRecentTagGameplayEffect;
+	const TSubclassOf<UGameplayEffect> RememberRecentTagGE = EffectClassPtr.LoadSynchronous();
+	if (!RememberRecentTagGE)
+	{
+		UE_LOG(LogLyraAbilitySystem, Warning, TEXT("GetRecentTagTimePassed: Unable to find RememberRecentTagGameplayEffect [%s]."), *EffectClassPtr.GetAssetName());
+		return false;
+	}
+
+	// Query to find valid Active GE Handle for searched tag
+	const FGameplayTagQuery GameplayTagQuery = FGameplayTagQuery::BuildQuery(
+		FGameplayTagQueryExpression()
+		.AllTagsMatch()
+		.AddTag(RecentSearchedTag)
+	);
+	
+	FGameplayEffectQuery GEQuery;
+	GEQuery.EffectDefinition = RememberRecentTagGE;
+	GEQuery.EffectTagQuery = GameplayTagQuery;
+
+	for(const auto& GameplayEffectHandle : GetActiveEffects(GEQuery))
+	{
+		const auto* GameplayEffect = ActiveGEs.GetActiveGameplayEffect(GameplayEffectHandle);
+		if(GameplayEffect && GameplayEffect->Spec.GetDynamicAssetTags().HasTag(RecentSearchedTag))
+		{
+			OutTimePassed = GetWorld()->TimeSeconds - GameplayEffect->StartWorldTime;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+FGameplayAbilitySpec* ULyraAbilitySystemComponent::GetActivatableGameplayAbilitySpecByTag(FGameplayTag AbilityTag,
+	bool bOnlyAbilitiesThatSatisfyTagRequirements) const
+{
+	for (const FGameplayAbilitySpec& Spec : ActivatableAbilities.Items)
+	{
+		if (Spec.Ability && Spec.Ability->AbilityTags.HasTag(AbilityTag)
+			&& (bOnlyAbilitiesThatSatisfyTagRequirements == false || Spec.Ability->DoesAbilitySatisfyTagRequirements(*this)))
+		{
+			return const_cast<FGameplayAbilitySpec*>(&Spec);
+		}
+	}
+
+	return nullptr;
+}
+
+bool ULyraAbilitySystemComponent::WillAbilityAffectTarget(const TSubclassOf<ULyraGameplayAbility> InAbility,
+                                                          const FGameplayEventData& Payload, const float Leeway, float& Strength)
+{
+	const ULyraGameplayAbility* const InAbilityCDO = InAbility.GetDefaultObject();
+
+	for (const FGameplayAbilitySpec& Spec : ActivatableAbilities.Items)
+	{
+		if (Spec.Ability == InAbilityCDO)
+		{
+			const FGameplayAbilityActorInfo* ActorInfo = AbilityActorInfo.Get();
+
+			return InAbilityCDO->WillAffectTarget(*ActorInfo, Spec.Handle, Payload, Leeway, Strength);
+		}
+	}
+
+	return false;
 }
 
 void ULyraAbilitySystemComponent::AddDynamicTagGameplayEffect(const FGameplayTag& Tag)
