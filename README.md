@@ -1,2 +1,2 @@
-# LyraStarterGame
- Rudimentary Building System
+# AI States System implementation in Lyra project
+ 
