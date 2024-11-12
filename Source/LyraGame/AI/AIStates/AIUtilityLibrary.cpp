@@ -12,15 +12,12 @@ float UAIUtilityLibrary::GetDistanceToAITarget(const AAIStateController* SourceA
 		return 0.0f;
 	}
 	
-	if(IsValid(SourceAI))
+	const AActor* TargetActor = SourceAI->GetTarget();
+	const APawn* SourcePawn = SourceAI->GetPawn();
+	
+	if(IsValid(TargetActor) && IsValid(SourcePawn))
 	{
-		const AActor* TargetActor = SourceAI->GetTarget();
-		const APawn* SourcePawn = SourceAI->GetPawn();
-		
-		if(IsValid(TargetActor) && IsValid(SourcePawn))
-		{
-			return FVector::Distance(TargetActor->GetActorLocation(), SourcePawn->GetActorLocation());
-		}	
+		return FVector::Distance(TargetActor->GetActorLocation(), SourcePawn->GetActorLocation());
 	}
 
 	UE_LOG(LogTemp, Error, TEXT("UAIUtilityLibrary::GetDistanceToAITarget - Could not calculate distance!"));
